@@ -7,9 +7,20 @@ import {CustomInput, Label} from "reactstrap";
 import AWS from 'aws-sdk';
 
 
+var file = 'data.json'
+var obj = {startDate: new Date("2020/03/08"),
+            endDate: new Date("2020/03/10"),
+            name: '',
+            term: '',
+            main_category: '',
+            category: '', 
+            country: '',
+            usd_goal_real: ''
+        }
+
 class InputForm extends React.Component {
 
-    componentDidMount (){
+    /* componentDidMount (){
         // Load the AWS SDK for Node.js
         var AWS = require('aws-sdk');
         // Set the region 
@@ -34,18 +45,17 @@ class InputForm extends React.Component {
         console.log("Success", data.Item);
     }
   });
-    }
-
+    } */
 
     state = {
         startDate: new Date("2020/03/08"),
         endDate: new Date("2020/03/10"),
         name: '',
-        budget: '',
         term: '',
         main_category: '',
         category: '', 
-        country: ''
+        country: '',
+        usd_goal_real: ''
     }
 
     // handles change for any Form Field
@@ -67,11 +77,19 @@ class InputForm extends React.Component {
         this.setState({endDate: moment(date).format('YYYY-MM-DD')});
       };
 
+      sendData = function jsonfile(file){
+        jsonfile.writeFile(file, obj, function (err) {
+            console.log(err);
+            });
+        };
+
+
     render() {
         
         return (
            <div className='components'>
-            
+
+            <form onSubmit={this.sendData}>
                 <div className='form'>
                 <Label for="project_name">Project Name</Label>
                     <div className="form-group">
@@ -86,19 +104,6 @@ class InputForm extends React.Component {
                         />
                     </div>
 
-                    <Label for="budget">Budget (Dollars)</Label>
-                    <div className="form-group">
-                        <input 
-                            className="inputBudget"
-                            type="text"
-                            name="budget"
-                            placeholder="Your budget"
-                            value={this.state.budget}
-                            onChange={this.handle_change}
-                            required 
-                        />
-                    </div>
-
                     <Label for="main_category">Main category</Label>
                     <div className="form-select">
                         <CustomInput 
@@ -107,6 +112,7 @@ class InputForm extends React.Component {
                             name = "main_category"
                             onChange={this.handle_change}
                             value={this.state.main_category}
+                            required
                         >
                             <option value="it">IT</option>
                             <option value="clothes">Clothes</option>
@@ -122,6 +128,7 @@ class InputForm extends React.Component {
                             name = "category"
                             onChange={this.handle_change}
                             value={this.state.category}
+                            required
                         >
                             <option value="computer">Computer</option>
                             <option value="t_shirt">T-Shirt</option>
@@ -137,6 +144,7 @@ class InputForm extends React.Component {
                             name = "country"
                             onChange={this.handle_change}
                             value={this.state.country}
+                            required
                         >
                             <option value="madagaskar">Madagaskar</option>
                             <option value="poland">Poland</option>
@@ -155,6 +163,7 @@ class InputForm extends React.Component {
                             peekNextMonth
                             showMonthDropdown
                             showYearDropdown
+                            required
                         />
                     </div>
 
@@ -169,16 +178,31 @@ class InputForm extends React.Component {
                             peekNextMonth
                             showMonthDropdown
                             showYearDropdown
+                            required
+                        />
+                    </div>
+
+                    <Label for="usd_goal_real">USD Goal</Label>
+                    <div className="form-group">
+                        <input 
+                            className="inputUsd_goal_real"
+                            type="text"
+                            name="usd_goal_real"
+                            placeholder="Your USD goal"
+                            value={this.state.usd_goal_real}
+                            onChange={this.handle_change}
+                            required 
                         />
                     </div>
 
                     <div className="form-group">
                         <button 
                             className="btn btn-primary btn-block" 
-                            type="submit">Check project
+                            type="submit">Submit
                         </button>
                     </div>
                 </div>
+                </form>
 
            </div>
         );
