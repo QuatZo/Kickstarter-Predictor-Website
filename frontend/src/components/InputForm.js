@@ -3,86 +3,116 @@ import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment'
 import {CustomInput, Label} from "reactstrap";
+import axios from "axios";
 // import entire SDK
 import AWS from 'aws-sdk';
 
 
 var file = 'data.json'
-var obj = {startDate: new Date("2020/03/08"),
-            endDate: new Date("2020/03/10"),
-            name: '',
-            term: '',
-            main_category: '',
-            category: '', 
-            country: '',
-            usd_goal_real: ''
-        }
 
 class InputForm extends React.Component {
 
-    /* componentDidMount (){
-        // Load the AWS SDK for Node.js
-        var AWS = require('aws-sdk');
-        // Set the region 
-        AWS.config.update({region: 'us-east-1'});
-
-        // Create the DynamoDB service object
-        var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-
-        var params = {
-            TableName: 'categories',
-            Key: {
-              'id': {"N": '0'},
-              "name": {"S": "Poetry"}
+    constructor(props) {
+        super(props);
+        this.state = {
+          categories: [],
+          maincategories: [],
+          countries: [],
+          requestData: {
+            predict: true,
+            name: '',
+            category: '',
+            main_category: '',
+            country: '',
+            campaign:{
+                start: "",
+                end: "",
+            },
+            usd_goal_real: ''
             }
-          };
+        };
+      }
 
-       // Call DynamoDB to read the item from the table
-        ddb.getItem(params, function(err, data) {
-        if (err) {
-        console.log("Error", err);
-        } else {
-        console.log("Success", data.Item);
-    }
-  });
-    } */
+    componentDidMount (){
+        let data = {
+            "operation": "list",
+            "table": "maincategories"
+          }
+        axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', data)
+            .then(res => {
+                let items = res.data.Items
+                items.sort((a, b) => (a.name > b.name) ? 1 : -1)
+                this.setState({maincategories: items})
+            })
+            .then(() => {
+                data.table = "categories"
+                axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', data)
+                    .then(res => {
+                        let items = res.data.Items
+                        items.sort((a, b) => (a.name > b.name) ? 1 : -1)
+                        this.setState({categories: items})
+                    })
+                    .catch(err => console.log(err));
+            })
+            .then(() => {
+                data.table = "countries"
+                axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', data)
+                    .then(res => {
+                        let items = res.data.Items
+                        items.sort((a, b) => (a.name > b.name) ? 1 : -1)
+                        this.setState({countries: items})
+                    })
+                    .catch(err => console.log(err));
+            })
+            .catch(err => console.log(err));
+    } 
 
-    state = {
-        startDate: new Date("2020/03/08"),
-        endDate: new Date("2020/03/10"),
-        name: '',
-        term: '',
-        main_category: '',
-        category: '', 
-        country: '',
-        usd_goal_real: ''
-    }
-
-    // handles change for any Form Field
-    handle_change = e => {
-    const name = e.target.name;
-    const value = e.target.value;
-        this.setState(prevstate => {
-        const newState = { ...prevstate };
-        newState[name] = value;
-        return newState;
-        });
-    };
+    handle_change = (e) => {
+        let { name, value } = e.target;
+        const requestData = { ...this.state.requestData, [name]: value};
+        this.setState({ requestData });
+      };
 
     handleChangeDateStart = date => {
-        this.setState({startDate: moment(date).format('YYYY-MM-DD')});
-      };
+        var dt;
+        try{
+            dt = moment(date).format('YYYY-MM-DD')
+        }
+        catch(RangeError){
+            dt = "";
+        }
+        let requestData = {...this.state.requestData}
+        requestData.campaign.start = dt;
+        this.setState({requestData});
+    };
 
-      handleChangeDateEnd = date => {
-        this.setState({endDate: moment(date).format('YYYY-MM-DD')});
-      };
+    handleChangeDateEnd = date => {
+        var dt;
+        try{
+            dt = moment(date).format('YYYY-MM-DD')
+        }
+        catch(RangeError){
+            dt = "";
+        }
+        let requestData = {...this.state.requestData}
+        requestData.campaign.end = dt;
+        this.setState({requestData});
+    };
 
-      sendData = function jsonfile(file){
-        jsonfile.writeFile(file, obj, function (err) {
-            console.log(err);
-            });
-        };
+    onConfirm = e => {
+        e.preventDefault();
+        let data = {...this.state.requestData}
+        data.country = parseInt(data.country)
+        data.category = parseInt(data.category)
+        data.main_category = parseInt(data.main_category)
+        data.usd_goal_real = data.usd_goal_real.replace(',','.')
+        data.usd_goal_real = parseFloat(data.usd_goal_real)
 
+        axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-predictor', data)
+            .then(res => {
+                console.log(res)
+        })
+    }
 
     render() {
         
@@ -98,7 +128,7 @@ class InputForm extends React.Component {
                             type="text"
                             name="name"
                             placeholder="Input your project name"
-                            value={this.state.name}
+                            value={this.state.requestData.name}
                             onChange={this.handle_change}
                             required 
                         />
@@ -111,12 +141,18 @@ class InputForm extends React.Component {
                             className={"form-control " + this.props.theme}
                             name = "main_category"
                             onChange={this.handle_change}
-                            value={this.state.main_category}
+                            value={this.state.requestData.main_category}
                             required
                         >
-                            <option value="it">IT</option>
-                            <option value="clothes">Clothes</option>
-                            <option value="cooking">Cooking</option>
+                            <option value=''></option>
+                            {
+                                this.state.maincategories.map(maincategory => (
+                                    <option 
+                                        value={maincategory.id}> 
+                                        {maincategory.name}  
+                                    </option>
+                                ))
+                            }
                         </CustomInput>
                     </div>
 
@@ -127,12 +163,18 @@ class InputForm extends React.Component {
                             className={"form-control " + this.props.theme}
                             name = "category"
                             onChange={this.handle_change}
-                            value={this.state.category}
+                            value={this.state.requestData.category}
                             required
                         >
-                            <option value="computer">Computer</option>
-                            <option value="t_shirt">T-Shirt</option>
-                            <option value="pizza">Pizza</option>
+                            <option value=''></option>
+                            {
+                                this.state.categories.map(category => (
+                                    <option 
+                                        value={category.id}> 
+                                        {category.name}    
+                                    </option>
+                                ))
+                            }
                         </CustomInput>
                     </div>
 
@@ -143,12 +185,18 @@ class InputForm extends React.Component {
                             className={"form-control " + this.props.theme}
                             name = "country"
                             onChange={this.handle_change}
-                            value={this.state.country}
+                            value={this.state.requestData.country}
                             required
                         >
-                            <option value="madagaskar">Madagaskar</option>
-                            <option value="poland">Poland</option>
-                            <option value="usa">USA</option>
+                            <option value=''></option>
+                            {
+                                this.state.countries.map(country => (
+                                    <option 
+                                        value={country.id}> 
+                                        {country.name}    
+                                    </option>
+                                ))
+                            }
                         </CustomInput>
                     </div>
 
@@ -158,7 +206,7 @@ class InputForm extends React.Component {
                             className="inputTerm"
                             type="text"
                             name="startDate"
-                            value={this.state.startDate}
+                            value={this.state.requestData.campaign.start}
                             onChange={this.handleChangeDateStart}
                             peekNextMonth
                             showMonthDropdown
@@ -173,7 +221,7 @@ class InputForm extends React.Component {
                             className="inputTerm"
                             type="text"
                             name="endDate"
-                            value={this.state.endDate}
+                            value={this.state.requestData.campaign.end}
                             onChange={this.handleChangeDateEnd}
                             peekNextMonth
                             showMonthDropdown
@@ -189,7 +237,7 @@ class InputForm extends React.Component {
                             type="text"
                             name="usd_goal_real"
                             placeholder="Your USD goal"
-                            value={this.state.usd_goal_real}
+                            value={this.state.requestData.usd_goal_real}
                             onChange={this.handle_change}
                             required 
                         />
@@ -198,7 +246,7 @@ class InputForm extends React.Component {
                     <div className="form-group">
                         <button 
                             className="btn btn-primary btn-block" 
-                            type="submit">Submit
+                            onClick={this.onConfirm}>Submit
                         </button>
                     </div>
                 </div>
