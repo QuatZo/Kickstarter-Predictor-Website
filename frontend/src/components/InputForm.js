@@ -4,14 +4,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment'
 import {CustomInput, Label} from "reactstrap";
 import axios from "axios";
-// import entire SDK
-import AWS from 'aws-sdk';
 
-
-var file = 'data.json'
 
 class InputForm extends React.Component {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -35,8 +30,8 @@ class InputForm extends React.Component {
 
     componentDidMount (){
         let data = {
-            "operation": "list",
-            "table": "maincategories"
+            operation: "list",
+            table: "maincategories"
           }
         axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', data)
             .then(res => {
@@ -71,7 +66,7 @@ class InputForm extends React.Component {
         let { name, value } = e.target;
         const requestData = { ...this.state.requestData, [name]: value};
         this.setState({ requestData });
-      };
+    };
 
     handleChangeDateStart = date => {
         var dt;
@@ -108,155 +103,175 @@ class InputForm extends React.Component {
         data.usd_goal_real = data.usd_goal_real.replace(',','.')
         data.usd_goal_real = parseFloat(data.usd_goal_real)
 
+        let id = -1
+
         axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-predictor', data)
             .then(res => {
-                console.log(res)
-        })
+                data = res.data;
+                let dynamo_data = {
+                    operation: "list",
+                    table: "predictions",
+                  }
+                  axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', dynamo_data)
+                    .then(dynamo_res => {
+                        let items = dynamo_res.data.Items
+                        items.sort((a, b) => (a.id < b.id) ? 1 : -1)
+                        console.log(items)
+                        if(items.length){
+                            id = items[0].id
+                        }
+                        console.log(id)
+                    })
+                    .then(() => {
+                        data.id = id + 1;
+                        data.start = data.campaign.start;
+                        data.end = data.campaign.end;
+                        delete data.campaign;
+
+                        let predict_data = {
+                            operation: "create",
+                            table: "predictions",
+                            id: id + 1,
+                            record: data 
+                        }
+                        console.log(predict_data)
+                        console.log(JSON.stringify(predict_data))
+                        axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', predict_data)
+                    })
+            })
     }
 
     render() {
-        
         return (
            <div className='components'>
+                <form onSubmit={this.sendData}>
+                    <div className='form'>
+                    <Label for="project_name">Project Name</Label>
+                        <div className="form-group">
+                            <input 
+                                className="inputName"
+                                type="text"
+                                name="name"
+                                placeholder="Input your project name"
+                                value={this.state.requestData.name}
+                                onChange={this.handle_change}
+                                required 
+                            />
+                        </div>
 
-            <form onSubmit={this.sendData}>
-                <div className='form'>
-                <Label for="project_name">Project Name</Label>
-                    <div className="form-group">
-                        <input 
-                            className="inputName"
-                            type="text"
-                            name="name"
-                            placeholder="Input your project name"
-                            value={this.state.requestData.name}
-                            onChange={this.handle_change}
-                            required 
-                        />
-                    </div>
-
-                    <Label for="main_category">Main category</Label>
-                    <div className="form-select">
-                        <CustomInput 
-                            type="select"
-                            className={"form-control " + this.props.theme}
-                            name = "main_category"
-                            onChange={this.handle_change}
-                            value={this.state.requestData.main_category}
-                            required
-                        >
-                            <option value=''></option>
-                            {
-                                this.state.maincategories.map(maincategory => (
+                        <Label for="main_category">Main category</Label>
+                        <div className="form-select">
+                            <CustomInput 
+                                type="select"
+                                className={"form-control " + this.props.theme}
+                                name = "main_category"
+                                onChange={this.handle_change}
+                                value={this.state.requestData.main_category}
+                                required
+                            >
+                                <option value=''></option>
+                                {this.state.maincategories.map(maincategory => (
                                     <option 
                                         value={maincategory.id}> 
                                         {maincategory.name}  
                                     </option>
-                                ))
-                            }
-                        </CustomInput>
-                    </div>
+                                ))}
+                            </CustomInput>
+                        </div>
 
-                    <Label for="category">Category</Label>
-                    <div className="form-select">
-                        <CustomInput 
-                            type="select"
-                            className={"form-control " + this.props.theme}
-                            name = "category"
-                            onChange={this.handle_change}
-                            value={this.state.requestData.category}
-                            required
-                        >
-                            <option value=''></option>
-                            {
-                                this.state.categories.map(category => (
+                        <Label for="category">Category</Label>
+                        <div className="form-select">
+                            <CustomInput 
+                                type="select"
+                                className={"form-control " + this.props.theme}
+                                name = "category"
+                                onChange={this.handle_change}
+                                value={this.state.requestData.category}
+                                required
+                            >
+                                <option value=''></option>
+                                {this.state.categories.map(category => (
                                     <option 
                                         value={category.id}> 
                                         {category.name}    
                                     </option>
-                                ))
-                            }
-                        </CustomInput>
-                    </div>
+                                ))}
+                            </CustomInput>
+                        </div>
 
-                    <Label for="country">Country</Label>
-                    <div className="form-select">
-                        <CustomInput 
-                            type="select"
-                            className={"form-control " + this.props.theme}
-                            name = "country"
-                            onChange={this.handle_change}
-                            value={this.state.requestData.country}
-                            required
-                        >
-                            <option value=''></option>
-                            {
-                                this.state.countries.map(country => (
+                        <Label for="country">Country</Label>
+                        <div className="form-select">
+                            <CustomInput 
+                                type="select"
+                                className={"form-control " + this.props.theme}
+                                name = "country"
+                                onChange={this.handle_change}
+                                value={this.state.requestData.country}
+                                required
+                            >
+                                <option value=''></option>
+                                {this.state.countries.map(country => (
                                     <option 
                                         value={country.id}> 
                                         {country.name}    
                                     </option>
-                                ))
-                            }
-                        </CustomInput>
-                    </div>
+                                ))}
+                            </CustomInput>
+                        </div>
 
-                    <Label for="start_date">Start</Label>
-                    <div className="form-group">
-                        <DatePicker 
-                            className="inputTerm"
-                            type="text"
-                            name="startDate"
-                            value={this.state.requestData.campaign.start}
-                            onChange={this.handleChangeDateStart}
-                            peekNextMonth
-                            showMonthDropdown
-                            showYearDropdown
-                            required
-                        />
-                    </div>
+                        <Label for="start_date">Start</Label>
+                        <div className="form-group">
+                            <DatePicker 
+                                className="inputTerm"
+                                type="text"
+                                name="startDate"
+                                value={this.state.requestData.campaign.start}
+                                onChange={this.handleChangeDateStart}
+                                peekNextMonth
+                                showMonthDropdown
+                                showYearDropdown
+                                required
+                            />
+                        </div>
 
-                    <Label for="end_date">End</Label>
-                    <div className="form-group">
-                        <DatePicker 
-                            className="inputTerm"
-                            type="text"
-                            name="endDate"
-                            value={this.state.requestData.campaign.end}
-                            onChange={this.handleChangeDateEnd}
-                            peekNextMonth
-                            showMonthDropdown
-                            showYearDropdown
-                            required
-                        />
-                    </div>
+                        <Label for="end_date">End</Label>
+                        <div className="form-group">
+                            <DatePicker 
+                                className="inputTerm"
+                                type="text"
+                                name="endDate"
+                                value={this.state.requestData.campaign.end}
+                                onChange={this.handleChangeDateEnd}
+                                peekNextMonth
+                                showMonthDropdown
+                                showYearDropdown
+                                required
+                            />
+                        </div>
 
-                    <Label for="usd_goal_real">USD Goal</Label>
-                    <div className="form-group">
-                        <input 
-                            className="inputUsd_goal_real"
-                            type="text"
-                            name="usd_goal_real"
-                            placeholder="Your USD goal"
-                            value={this.state.requestData.usd_goal_real}
-                            onChange={this.handle_change}
-                            required 
-                        />
-                    </div>
+                        <Label for="usd_goal_real">USD Goal</Label>
+                        <div className="form-group">
+                            <input 
+                                className="inputUsd_goal_real"
+                                type="text"
+                                name="usd_goal_real"
+                                placeholder="Your USD goal"
+                                value={this.state.requestData.usd_goal_real}
+                                onChange={this.handle_change}
+                                required 
+                            />
+                        </div>
 
-                    <div className="form-group">
-                        <button 
-                            className="btn btn-primary btn-block" 
-                            onClick={this.onConfirm}>Submit
-                        </button>
+                        <div className="form-group">
+                            <button 
+                                className="btn btn-primary btn-block" 
+                                onClick={this.onConfirm}>Submit
+                            </button>
+                        </div>
                     </div>
-                </div>
                 </form>
-
            </div>
         );
     }
-
-
-
 }
 export default InputForm;
