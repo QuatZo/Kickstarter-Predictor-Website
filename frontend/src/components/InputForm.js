@@ -154,9 +154,10 @@ class InputForm extends React.Component {
           country: form.country.trim().length === 0,
           start: form.campaign.start.toString().trim().length === 0 || !(moment(form.campaign.start.toString(), "YYYY-MM-DD").isValid()),
           end: form.campaign.end.toString().trim().length === 0 || !(moment(form.campaign.end.toString(), "YYYY-MM-DD").isValid()),
-          end_start: form.campaign.end.toString().trim() < form.campaign.start.toString().trim(),
+          end_start: form.campaign.end.toString().trim() < form.campaign.start.toString().trim() && form.campaign.end.toString().trim().length > 0,
+          end_start_equal: form.campaign.end.toString().trim() === form.campaign.start.toString().trim() && form.campaign.end.toString().trim().length > 0,
           usd_goal_real: form.usd_goal_real.trim().length === 0,
-          usd_goal_real_not_number: !(/^[0-9]+[.]{0,2}[0-9]{0,2}$/.test(form.usd_goal_real)),
+          usd_goal_real_not_number: !(/^[0-9]*[.]{0,2}[0-9]{0,2}$/.test(form.usd_goal_real)),
           checked: checkbox === false,
           }
       }
@@ -166,27 +167,29 @@ class InputForm extends React.Component {
         const isEnabled = !Object.keys(errors).some(x => errors[x]); // button is disabled as long as error exists
         return (
            <div className='components'>
+               <div className='form'>
                 <form onSubmit={this.sendData}>
-                    <div className='form'>
-                    <Label for="project_name">Project Name</Label>
+                    
+                    
                         <div className="form-group">
+                        <Label for="project_name">Project Name</Label>
                             <input 
                                 className="form-control"
                                 type="text"
                                 name="name"
-                                placeholder="Input your project name"
                                 value={this.state.requestData.name}
                                 onChange={this.handle_change}
                                 required 
                             />
-                            {errors.name ? (<small>Please insert campaign name</small>) : null}
+                            {errors.name ? (<span className='errorText'>Please insert campaign name</span>) : null}
                         </div>
 
+                        
+                        <div className="form-group">
                         <Label for="main_category">Main category</Label>
-                        <div className="form-select">
                             <CustomInput 
                                 type="select"
-                                className={"form-control "}
+                                className="form-control"
                                 name = "main_category"
                                 onChange={this.handle_change}
                                 value={this.state.requestData.main_category}
@@ -200,14 +203,15 @@ class InputForm extends React.Component {
                                     </option>
                                 ))}
                             </CustomInput>
-                            {errors.main_category ? (<small>Please choose main category</small>) : null}
+                            {errors.main_category ? (<span className='errorText'>Please choose main category</span>) : null}
                         </div>
 
+                        
+                        <div className="form-group">
                         <Label for="category">Category</Label>
-                        <div className="form-select">
                             <CustomInput 
                                 type="select"
-                                className={"form-control "}
+                                className="form-control"
                                 name = "category"
                                 onChange={this.handle_change}
                                 value={this.state.requestData.category}
@@ -221,14 +225,15 @@ class InputForm extends React.Component {
                                     </option>
                                 ))}
                             </CustomInput>
-                            {errors.category ? (<small>Please choose category</small>) : null}
+                            {errors.category ? (<span className='errorText'>Please choose category</span>) : null}
                         </div>
 
+                        
+                        <div className="form-group">
                         <Label for="country">Country</Label>
-                        <div className="form-select">
                             <CustomInput 
                                 type="select"
-                                className={"form-control"}
+                                className="form-control"
                                 name = "country"
                                 onChange={this.handle_change}
                                 value={this.state.requestData.country}
@@ -242,11 +247,12 @@ class InputForm extends React.Component {
                                     </option>
                                 ))}
                             </CustomInput>
-                            {errors.country ? (<small>Please choose country</small>) : null}
+                            {errors.country ? (<span className='errorText'>Please choose country</span>) : null}
                         </div>
 
-                        <Label for="start_date">Start</Label>
+                        
                         <div className="form-group">
+                        <Label for="start_date">Start</Label>
                             <DatePicker 
                                 className={"form-control" + (errors.begin ? " error" : "")}
                                 type="text"
@@ -258,11 +264,12 @@ class InputForm extends React.Component {
                                 showYearDropdown
                                 required
                             />
-                             {errors.start ? (<small>Please choose start date</small>) : null}
+                             {errors.start ? (<span className='errorText'>Please choose start date</span>) : null}
                         </div>
 
-                        <Label for="end_date">End</Label>
+                        
                         <div className="form-group">
+                        <Label for="end_date">End</Label>
                             <DatePicker 
                                 className={"form-control" + (errors.end ? " error" : "")}
                                 type="text"
@@ -274,27 +281,29 @@ class InputForm extends React.Component {
                                 showYearDropdown
                                 required
                             />
-                            {errors.end ? (<small>Please choose end date </small>) : null}
-                            {errors.end_start ? (<small>End date can't be earlier than start date. We don't support time travel</small>) : null}
+                            {errors.end ? (<span className='errorText'>Please choose end date </span>) : null}
+                            {errors.end_start ? (<span className='errorText'>End date can't be earlier than start date. We don't support time travel</span>) : null}
+                            {errors.end_start_equal ? (<span className='errorText'>Start date must be earlier than end date, not equal!</span>) : null}
                         </div>
 
-                        <Label for="usd_goal_real">USD Goal</Label>
+                        
                         <div className="form-group">
+                        <Label for="usd_goal_real">USD Goal</Label>
                             <input 
                                 className={"form-control" + (errors.usd_goal_real ? " error" : "")}
                                 type="text"
                                 name="usd_goal_real"
-                                placeholder="Your USD goal"
                                 value={this.state.requestData.usd_goal_real}
                                 onChange={this.handle_change}
                                 required 
                             />
-                            {errors.usd_goal_real ? (<small>Please insert money goal (in $)</small>) : null}
-                            {errors.usd_goal_real_not_number ? (<small>Incorrect value. Make sure to use dot instead of comma</small>) : null}
+                            {errors.usd_goal_real ? (<span className='errorText'>Please insert money goal (in $). </span>) : null}
+                            {errors.usd_goal_real_not_number ? (<span className='errorText'>Incorrect value. Make sure to use dot instead of comma</span>) : null}
                         </div>
 
-                        <Label for="checked">I agree to save given data for future analysis made by the predictor</Label>
+                        
                         <div className="form-group">
+                            <div className='checkboxContainer'>
                             <input 
                                 className={"form-control" + (errors.checked ? " error" : "")}
                                 type="checkbox"
@@ -303,7 +312,9 @@ class InputForm extends React.Component {
                                 onChange={this.handleCheckboxChange}
                                 required 
                             />
-                            {errors.checked}
+                            <Label for="checked" className='checkedText'>&nbsp;I agree to save given data for future analysis made by the predictor.</Label>
+                            </div>
+                            {errors.checked ? (<span className='errorChecked'>You must to agree in order to proceed</span>) : null}
                         </div>
 
                         <div className="form-group">
@@ -313,8 +324,9 @@ class InputForm extends React.Component {
                                 onClick={this.onConfirm}>Submit
                             </button>
                         </div>
-                    </div>
                 </form>
+                </div>
+                <div className='modelDescription'>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque pellentesque dictum lobortis. Phasellus porta est eget nibh faucibus pharetra. Etiam ac dolor sed ante tempor venenatis. Nam sit amet porta nisi. Fusce nec massa libero. Suspendisse libero tortor, aliquam nec justo in, ultrices posuere nulla. Curabitur fermentum, justo quis rutrum pretium, enim mauris auctor erat, vitae sagittis risus nibh vitae magna. Nulla facilisis commodo malesuada. Suspendisse lacinia pulvinar metus, non finibus nibh accumsan rhoncus. Integer tempor neque non metus semper sodales. Vestibulum sollicitudin sapien lobortis, porttitor arcu vitae, faucibus leo. Nam rutrum auctor dignissim. Mauris rhoncus nisi vel magna semper, nec cursus leo interdum. In gravida elit felis, eu vulputate ex dictum egestas.</div>
            </div>
         );
     }
