@@ -23,8 +23,9 @@ class InputForm extends React.Component {
                 start: "",
                 end: "",
             },
-            usd_goal_real: ''
-            }
+            usd_goal_real: '',
+            },
+          checked: false
         };
       }
 
@@ -94,6 +95,10 @@ class InputForm extends React.Component {
         this.setState({requestData});
     };
 
+    handleCheckboxChange = event =>{
+        this.setState({checked: event.target.checked});
+    }
+
     onConfirm = e => {
         e.preventDefault();
         let data = {...this.state.requestData}
@@ -141,7 +146,7 @@ class InputForm extends React.Component {
             })
     }
 
-    validate(form){
+    validate(form, checkbox){
         return{
           name: form.name.trim().length === 0,
           category: form.category.trim().length === 0,
@@ -152,11 +157,12 @@ class InputForm extends React.Component {
           end_start: form.campaign.end.toString().trim() < form.campaign.start.toString().trim(),
           usd_goal_real: form.usd_goal_real.trim().length === 0,
           usd_goal_real_not_number: !(/^[0-9]+[.]{0,2}[0-9]{0,2}$/.test(form.usd_goal_real)),
+          checked: checkbox === false,
           }
       }
 
     render() {
-        const errors = this.validate(this.state.requestData);
+        const errors = this.validate(this.state.requestData, this.state.checked);
         const isEnabled = !Object.keys(errors).some(x => errors[x]); // button is disabled as long as error exists
         return (
            <div className='components'>
@@ -285,6 +291,19 @@ class InputForm extends React.Component {
                             />
                             {errors.usd_goal_real ? (<small>Please insert money goal (in $)</small>) : null}
                             {errors.usd_goal_real_not_number ? (<small>Incorrect value. Make sure to use dot instead of comma</small>) : null}
+                        </div>
+
+                        <Label for="checked">I agree to save given data for future analysis made by the predictor</Label>
+                        <div className="form-group">
+                            <input 
+                                className={"form-control" + (errors.checked ? " error" : "")}
+                                type="checkbox"
+                                name="checked"
+                                value={this.state.checked}
+                                onChange={this.handleCheckboxChange}
+                                required 
+                            />
+                            {errors.checked}
                         </div>
 
                         <div className="form-group">
