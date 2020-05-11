@@ -141,7 +141,23 @@ class InputForm extends React.Component {
             })
     }
 
+    validate(form){
+        return{
+          name: form.name.trim().length === 0,
+          category: form.category.trim().length === 0,
+          main_category: form.main_category.trim().length === 0,
+          country: form.country.trim().length === 0,
+          start: form.campaign.start.toString().trim().length === 0 || !(moment(form.campaign.start.toString(), "YYYY-MM-DD").isValid()),
+          end: form.campaign.end.toString().trim().length === 0 || !(moment(form.campaign.end.toString(), "YYYY-MM-DD").isValid()),
+          end_start: form.campaign.end.toString().trim() < form.campaign.start.toString().trim(),
+          usd_goal_real: form.usd_goal_real.trim().length === 0,
+          usd_goal_real_not_number: !(/^[0-9]+[.]{0,2}[0-9]{0,2}$/.test(form.usd_goal_real)),
+          }
+      }
+
     render() {
+        const errors = this.validate(this.state.requestData);
+        const isEnabled = !Object.keys(errors).some(x => errors[x]); // button is disabled as long as error exists
         return (
            <div className='components'>
                 <form onSubmit={this.sendData}>
@@ -149,7 +165,7 @@ class InputForm extends React.Component {
                     <Label for="project_name">Project Name</Label>
                         <div className="form-group">
                             <input 
-                                className="inputName"
+                                className="form-control"
                                 type="text"
                                 name="name"
                                 placeholder="Input your project name"
@@ -157,13 +173,14 @@ class InputForm extends React.Component {
                                 onChange={this.handle_change}
                                 required 
                             />
+                            {errors.name ? (<small>Please insert campaign name</small>) : null}
                         </div>
 
                         <Label for="main_category">Main category</Label>
                         <div className="form-select">
                             <CustomInput 
                                 type="select"
-                                className={"form-control " + this.props.theme}
+                                className={"form-control "}
                                 name = "main_category"
                                 onChange={this.handle_change}
                                 value={this.state.requestData.main_category}
@@ -177,13 +194,14 @@ class InputForm extends React.Component {
                                     </option>
                                 ))}
                             </CustomInput>
+                            {errors.main_category ? (<small>Please choose main category</small>) : null}
                         </div>
 
                         <Label for="category">Category</Label>
                         <div className="form-select">
                             <CustomInput 
                                 type="select"
-                                className={"form-control " + this.props.theme}
+                                className={"form-control "}
                                 name = "category"
                                 onChange={this.handle_change}
                                 value={this.state.requestData.category}
@@ -197,13 +215,14 @@ class InputForm extends React.Component {
                                     </option>
                                 ))}
                             </CustomInput>
+                            {errors.category ? (<small>Please choose category</small>) : null}
                         </div>
 
                         <Label for="country">Country</Label>
                         <div className="form-select">
                             <CustomInput 
                                 type="select"
-                                className={"form-control " + this.props.theme}
+                                className={"form-control"}
                                 name = "country"
                                 onChange={this.handle_change}
                                 value={this.state.requestData.country}
@@ -217,14 +236,15 @@ class InputForm extends React.Component {
                                     </option>
                                 ))}
                             </CustomInput>
+                            {errors.country ? (<small>Please choose country</small>) : null}
                         </div>
 
                         <Label for="start_date">Start</Label>
                         <div className="form-group">
                             <DatePicker 
-                                className="inputTerm"
+                                className={"form-control" + (errors.begin ? " error" : "")}
                                 type="text"
-                                name="startDate"
+                                name="start"
                                 value={this.state.requestData.campaign.start}
                                 onChange={this.handleChangeDateStart}
                                 peekNextMonth
@@ -232,14 +252,15 @@ class InputForm extends React.Component {
                                 showYearDropdown
                                 required
                             />
+                             {errors.start ? (<small>Please choose start date</small>) : null}
                         </div>
 
                         <Label for="end_date">End</Label>
                         <div className="form-group">
                             <DatePicker 
-                                className="inputTerm"
+                                className={"form-control" + (errors.end ? " error" : "")}
                                 type="text"
-                                name="endDate"
+                                name="end"
                                 value={this.state.requestData.campaign.end}
                                 onChange={this.handleChangeDateEnd}
                                 peekNextMonth
@@ -247,12 +268,14 @@ class InputForm extends React.Component {
                                 showYearDropdown
                                 required
                             />
+                            {errors.end ? (<small>Please choose end date </small>) : null}
+                            {errors.end_start ? (<small>End date can't be earlier than start date. We don't support time travel</small>) : null}
                         </div>
 
                         <Label for="usd_goal_real">USD Goal</Label>
                         <div className="form-group">
                             <input 
-                                className="inputUsd_goal_real"
+                                className={"form-control" + (errors.usd_goal_real ? " error" : "")}
                                 type="text"
                                 name="usd_goal_real"
                                 placeholder="Your USD goal"
@@ -260,10 +283,13 @@ class InputForm extends React.Component {
                                 onChange={this.handle_change}
                                 required 
                             />
+                            {errors.usd_goal_real ? (<small>Please insert money goal (in $)</small>) : null}
+                            {errors.usd_goal_real_not_number ? (<small>Incorrect value. Make sure to use dot instead of comma</small>) : null}
                         </div>
 
                         <div className="form-group">
                             <button 
+                                disabled={!isEnabled}
                                 className="btn btn-primary btn-block" 
                                 onClick={this.onConfirm}>Submit
                             </button>
