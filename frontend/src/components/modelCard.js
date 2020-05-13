@@ -17,20 +17,12 @@ class ModelCard extends React.Component {
                 {this.props.model ? (
                     <div className='card'>
                         <div class="card-header">
-                            {this.props.model.name}
+                            {this.props.model.name.replace('-',' ').replace('_','.')}
                         </div>
+                        
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-6 col-sm-6"><b>Created</b></div>
-                                <div class="col-6 col-sm-6"> {this.props.model.created} </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-6 col-sm-6"><b>Accuracy</b></div>
-                                <div class="col-6 col-sm-6"> {this.props.model.accuracy} </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-6 col-sm-6"><b>Description</b></div>
-                                <div class="col-6 col-sm-6"> {this.props.model.description} </div>
+                                <div class="col-12 col-sm-12">{this.props.model.description} </div>
                             </div>
                         </div>
                     </div>

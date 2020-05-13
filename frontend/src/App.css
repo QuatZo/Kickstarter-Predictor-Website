@@ -1,14 +1,11 @@
 html, body {
   background-color: #282c34;
   line-height: normal;
-  overflow: hidden;
-  
 }
 
 .App {
   text-align: center;
   background-color: #282c34;
-  min-height: 100vh;
   color: white;
   margin: 0px;
 }
@@ -24,8 +21,8 @@ label {
 }
 
 .App-header {
-  margin-top: 50px;
-  margin-bottom: 50px;
+  margin-top: 10px;
+  margin-bottom: 10px;
   
 }
 
@@ -112,12 +109,44 @@ input[type=checkbox] {
 }
 
 .btn-block {
-  width: 50%;
-  position: relative;
+  width: 35%;
+  bottom: 5%;
   margin: auto;
   left: 50%;
+  background-color: #007bff;
+}
+
+.btn-block:hover {
+  width: 35%;
+  bottom: 5%;
+  margin: auto;
+  left: 50%;
+  background-color: #006aee;
+}
+
+.form-group-btn {
+  position: absolute;
+  bottom: 5%;
+  left: 26%;
+  width: 50%;
+}
+
+.card {
+  background-color: #282c34;
+  color: white;
+  border: none;
+}
+
+.card-header {
+  border-bottom: 1px solid #d4dadb;
+  background-color: #282c34;
 }
 
 .model{
   color: black;
+  position: absolute;
+  right: 10%;
+  left: 63%;
+  top: 0%;
+  bottom: 50%;
 }

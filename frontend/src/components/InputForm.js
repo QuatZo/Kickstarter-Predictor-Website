@@ -331,7 +331,7 @@ class InputForm extends React.Component {
                             {this.state.models.map((model, index) => (
                                 <option 
                                     value={index}> 
-                                    {model.name} [{model.accuracy}%] (Created: {model.created})
+                                    {model.name.replace('-',' ').replace('_','.')} [{model.accuracy}%] (Created: {model.created})
                                 </option>
                             ))}
                         </CustomInput>
@@ -353,7 +353,7 @@ class InputForm extends React.Component {
                         {errors.checked ? (<span className='errorChecked'>You must to agree in order to proceed</span>) : null}
                     </div>
 
-                    <div className="form-group">
+                    <div className="form-group-btn">
                         <button 
                             disabled={!isEnabled}
                             className="btn btn-primary btn-block" 
