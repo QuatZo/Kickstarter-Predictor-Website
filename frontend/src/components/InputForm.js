@@ -4,6 +4,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment'
 import {CustomInput, Label} from "reactstrap";
 import ModelCard from "./modelCard";
+import ModalConfirm from './PredictionModal';
 import axios from "axios";
 
 
@@ -113,6 +114,12 @@ class InputForm extends React.Component {
         this.setState({checked: event.target.checked});
     }
 
+    toggleConfirmModal = (header="", content="", confirmText="", cancelText="", onConfirm=() => this.toggleConfirmModal) => {
+        this.setState({
+          ModalConfirm: !this.state.ModalConfirm,
+        });
+      }
+
     onConfirm = e => {
         e.preventDefault();
         let data = {...this.state.requestData}
@@ -124,6 +131,7 @@ class InputForm extends React.Component {
         data.usd_goal_real = parseFloat(data.usd_goal_real)
         data.model = models[data.model].name
         console.log(data)
+        this.toggleConfirmModal();
 
         let id = -1
 
@@ -366,6 +374,12 @@ class InputForm extends React.Component {
                     model={this.state.models[this.state.requestData.model]}
                 >
                 </ModelCard>
+
+                {this.state.ModalConfirm ? (
+                <ModalConfirm 
+                  toggle={this.toggleConfirmModal}
+                />
+              ) : null}
            </div>
         );
     }
