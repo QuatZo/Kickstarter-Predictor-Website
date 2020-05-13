@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../images/kick-logo.png'; // Tell webpack this JS file uses this image
+import logo from '../images/pol-kckstr.png'; // Tell webpack this JS file uses this image
 
 function Logo() {
   // Import result is the URL of your image

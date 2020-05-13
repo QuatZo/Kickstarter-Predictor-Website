@@ -1,6 +1,11 @@
 html, body {
   background-color: #282c34;
   line-height: normal;
+  
+}
+
+*::selection {
+  background: transparent !important; /* WebKit/Blink Browsers */
 }
 
 .App {
@@ -16,7 +21,7 @@ label {
 }
 
 .logo {
-  height: 5vmin;
+  height: 8vmin;
   pointer-events: none;
 }
 
@@ -127,7 +132,7 @@ input[type=checkbox] {
 .form-group-btn {
   position: absolute;
   bottom: 5%;
-  left: 26%;
+  left: 24%;
   width: 50%;
 }
 

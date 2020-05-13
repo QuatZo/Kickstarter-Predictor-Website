@@ -352,6 +352,7 @@ class InputForm extends React.Component {
                             className={"form-control" + (errors.checked ? " error" : "")}
                             type="checkbox"
                             name="checked"
+                            id="checked"
                             value={this.state.checked}
                             onChange={this.handleCheckboxChange}
                             required 
