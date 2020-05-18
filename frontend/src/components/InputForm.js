@@ -29,6 +29,10 @@ class InputForm extends React.Component {
             usd_goal_real: '',
             model: ''
           },
+          responseData: {
+              title: '',
+              message: ''
+          },
           checked: false,
         };
       }
@@ -135,6 +139,10 @@ class InputForm extends React.Component {
 
         let id = -1
 
+        let placeholderResponseData = {...data}
+        placeholderResponseData.prediction = 'failed'
+        placeholderResponseData.prediction_proba = .23
+
         // axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-predictor', data)
         //     .then(res => {
         //         data = res.data;
@@ -162,11 +170,19 @@ class InputForm extends React.Component {
         //                     operation: "create",
         //                     table: "predictions",
         //                     id: id + 1,
-        //                     record: data 
+        //                     record: data
         //                 }
         //                 console.log(predict_data)
         //                 console.log(JSON.stringify(predict_data))
-        //                 axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', predict_data)
+                            // ADD response prediction TO predict_data
+        //                 
+                            // let responseData = {...this.state.responseData}
+                            // responseData.title = 'Prediction for ' + data.model + ' model.'
+                            // responseData.message = data.model + ' has predicted ' + data.prediction + (data.prediction_proba ? 'with probability of ' + data.prediction_proba : null) + '.'
+                            // this.setState({responseData})
+
+                            // UNCOMMENT THIS WHEN EVERYTHING ELSE WORKS
+        //                  axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', predict_data)
         //             })
         //     })
     }
@@ -379,6 +395,8 @@ class InputForm extends React.Component {
                 {this.state.ModalConfirm ? (
                 <ModalConfirm 
                   toggle={this.toggleConfirmModal}
+                  title={this.state.responseData.title}
+                  message={this.state.responseData.message}
                 />
               ) : null}
            </div>

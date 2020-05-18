@@ -1,8 +1,5 @@
 import React from "react";
 import 'react-datepicker/dist/react-datepicker.css';
-import moment from 'moment'
-import axios from "axios";
-
 
 class ModelCard extends React.Component {
     constructor(props) {
