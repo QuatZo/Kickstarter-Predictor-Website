@@ -4,7 +4,7 @@ html, body {
   
 }
 
-*::selection {
+.checkedText::selection {
   background: transparent !important; /* WebKit/Blink Browsers */
 }
 

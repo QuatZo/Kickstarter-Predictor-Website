@@ -355,7 +355,7 @@ class InputForm extends React.Component {
                             {this.state.models.map((model, index) => (
                                 <option 
                                     value={index}> 
-                                    {model.name.replace('-',' ').replace('_','.')} [{model.accuracy}%] (Created: {model.created})
+                                    {model.name.replace('-',' ').replace('-v',' v').replace('_','.')} [{model.accuracy}%] (Created: {model.created})
                                 </option>
                             ))}
                         </CustomInput>

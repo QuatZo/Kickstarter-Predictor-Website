@@ -14,7 +14,7 @@ class ModelCard extends React.Component {
                 {this.props.model ? (
                     <div className='card'>
                         <div class="card-header">
-                            {this.props.model.name.replace('-',' ').replace('_','.')}
+                            {this.props.model.name.replace('-',' ').replace('-v',' v').replace('_','.')}
                         </div>
                         
                         <div class="card-body">
