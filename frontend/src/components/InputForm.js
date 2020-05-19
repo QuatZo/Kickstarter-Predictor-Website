@@ -30,8 +30,8 @@ class InputForm extends React.Component {
             model: ''
           },
           responseData: {
-              title: '',
-              message: ''
+              title: 'Loading data...',
+              message: 'Model is predicting'
           },
           checked: false,
         };
@@ -118,9 +118,14 @@ class InputForm extends React.Component {
         this.setState({checked: event.target.checked});
     }
 
-    toggleConfirmModal = (header="", content="", confirmText="", cancelText="", onConfirm=() => this.toggleConfirmModal) => {
+    toggleConfirmModal = () => {
+        let responseData = {
+            title: 'Loading data...',
+            message: 'Model is predicting'
+        }
         this.setState({
           ModalConfirm: !this.state.ModalConfirm,
+          responseData
         });
       }
 
@@ -134,57 +139,63 @@ class InputForm extends React.Component {
         data.usd_goal_real = data.usd_goal_real.replace(',','.')
         data.usd_goal_real = parseFloat(data.usd_goal_real)
         data.model = models[data.model].name
-        console.log(data)
         this.toggleConfirmModal();
 
         let id = -1
 
-        let placeholderResponseData = {...data}
-        placeholderResponseData.prediction = 'failed'
-        placeholderResponseData.prediction_proba = .23
+        axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-predictor', data)
+            .then(res => {
+                data = res.data;
+                let dynamo_data = {
+                    operation: "list",
+                    table: "predictions",
+                  }
+                  axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', dynamo_data)
+                    .then(dynamo_res => {
+                        let items = dynamo_res.data.Items
+                        items.sort((a, b) => (a.id < b.id) ? 1 : -1)
+                        if(items.length){
+                            id = items[0].id
+                        }
+                    })
+                    .then(() => {
+                        data.id = id + 1;
+                        data.start = data.campaign.start;
+                        data.end = data.campaign.end;
+                        delete data.campaign;
 
-        // axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-predictor', data)
-        //     .then(res => {
-        //         data = res.data;
-        //         let dynamo_data = {
-        //             operation: "list",
-        //             table: "predictions",
-        //           }
-        //           axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', dynamo_data)
-        //             .then(dynamo_res => {
-        //                 let items = dynamo_res.data.Items
-        //                 items.sort((a, b) => (a.id < b.id) ? 1 : -1)
-        //                 console.log(items)
-        //                 if(items.length){
-        //                     id = items[0].id
-        //                 }
-        //                 console.log(id)
-        //             })
-        //             .then(() => {
-        //                 data.id = id + 1;
-        //                 data.start = data.campaign.start;
-        //                 data.end = data.campaign.end;
-        //                 delete data.campaign;
+                        let predict_data = {
+                            operation: "create",
+                            table: "predictions",
+                            id: id + 1,
+                            record: data
+                        }
+                        let status = ["fail", "success"]
+                        let prediction = null
 
-        //                 let predict_data = {
-        //                     operation: "create",
-        //                     table: "predictions",
-        //                     id: id + 1,
-        //                     record: data
-        //                 }
-        //                 console.log(predict_data)
-        //                 console.log(JSON.stringify(predict_data))
-                            // ADD response prediction TO predict_data
-        //                 
-                            // let responseData = {...this.state.responseData}
-                            // responseData.title = 'Prediction for ' + data.model + ' model.'
-                            // responseData.message = data.model + ' has predicted ' + data.prediction + (data.prediction_proba ? 'with probability of ' + data.prediction_proba : null) + '.'
-                            // this.setState({responseData})
+                        if(data.prediction_proba){
+                            if(data.prediction[0] < data.prediction[1]){
+                                prediction = 1
+                            }else{
+                                prediction = 0
+                            }
+                        }else{
+                            prediction = data.prediction
+                        }
+                        let responseData = {...this.state.responseData}
+                        responseData.title = 'Prediction for ' + data.model + ' model.'
+                        responseData.message = 'Given model has predicted that campaign will ' + status[prediction] + '. '
+                        if(data.prediction_proba){
+                            responseData.message += 'Certainty of given result is ' + Math.round(data.prediction[prediction]*100) + '%'
+                        }
+                        this.setState({responseData})
 
-                            // UNCOMMENT THIS WHEN EVERYTHING ELSE WORKS
-        //                  axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', predict_data)
-        //             })
-        //     })
+                        delete data.prediction_proba
+                        data.prediction = prediction
+
+                        axios.post('https://3l7z4wecia.execute-api.us-east-1.amazonaws.com/default/api-dynamodb', predict_data)
+                    })
+            })
     }
 
     validate(form, checkbox){
