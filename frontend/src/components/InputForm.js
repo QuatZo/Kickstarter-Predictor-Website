@@ -5,6 +5,7 @@ import moment from 'moment'
 import {CustomInput, Label} from "reactstrap";
 import ModelCard from "./modelCard";
 import ModalConfirm from './PredictionModal';
+import ModalReport from './ReportModal';
 import axios from "axios";
 
 
@@ -128,6 +129,13 @@ class InputForm extends React.Component {
           responseData
         });
       }
+    
+    toggleReportModal = () => {
+        this.setState({
+            ModalReport: !this.state.ModalReport
+          });
+        
+    }
 
     onConfirm = e => {
         e.preventDefault();
@@ -388,13 +396,20 @@ class InputForm extends React.Component {
                         </div>
                         {errors.checked ? (<span className='errorChecked'>You must to agree in order to proceed</span>) : null}
                     </div>
-
-                    <div className="form-group-btn">
-                        <button 
-                            disabled={!isEnabled}
-                            className="btn btn-primary btn-block" 
-                            onClick={this.onConfirm}>Submit
-                        </button>
+                    <div className="buttons">
+                        <div className="form-group-btn" >
+                            <button 
+                                disabled={!isEnabled}
+                                className="btn btn-primary btn-block" 
+                                onClick={this.onConfirm}>Submit
+                            </button>
+                        </div>
+                        <div className="form-group-btn">
+                            <div 
+                                className="btn btn-primary btn-block" 
+                                onClick={this.toggleReportModal}>Report
+                            </div>
+                        </div>
                     </div>
                 </form>
                 </div>
@@ -409,6 +424,11 @@ class InputForm extends React.Component {
                   title={this.state.responseData.title}
                   message={this.state.responseData.message}
                 />
+              ) : null}
+                {this.state.ModalReport ? (
+                    <ModalReport
+                    toggle={this.toggleReportModal}
+                    />
               ) : null}
            </div>
         );

@@ -129,11 +129,16 @@ input[type=checkbox] {
   background-color: #006aee;
 }
 
-.form-group-btn {
+.buttons {
   position: absolute;
+  display: flex;
   bottom: 5%;
   left: 24%;
   width: 50%;
+}
+
+.form-group-btn {
+  width: 100%;
 }
 
 .card {
