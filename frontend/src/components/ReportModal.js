@@ -18,7 +18,7 @@ export default class CustomModal extends Component {
     return (
       <Modal className={"modal-open"} isOpen={true} toggle={toggle} size="xl">
         <ModalBody className={"modal-body"}> 
-          <iframe width="100%" height="875" src="https://datastudio.google.com/embed/reporting/4d6d0ebc-3475-4b86-be64-83f3ce13a6fb/page/LwSRB" frameborder="0" allowfullscreen></iframe>
+          <iframe width="100%" height="875" src="https://datastudio.google.com/embed/reporting/4d6d0ebc-3475-4b86-be64-83f3ce13a6fb/page/EpRRB" frameborder="0" allowfullscreen></iframe>
         </ModalBody>
       </Modal>
     );
